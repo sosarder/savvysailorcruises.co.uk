@@ -270,8 +270,9 @@
         content.innerHTML =
             '<h2 style="color:var(--primary);margin-bottom:0.5rem;">' + esc(c.cruise_name) + '</h2>' +
             '<div class="detail-price-box">' +
-            '<div class="big-price">\u00a3' + (c.price_numeric ? c.price_numeric.toLocaleString() : "--") + '</div>' +
-            '<div class="per-night">\u00a3' + (c.ppn_numeric ? c.ppn_numeric.toFixed(2) : "--") + ' per night &middot; ' + indicatorBadge(c.price_indicator) + '</div>' +
+            '<div class="big-price">\u00a3' + (c.ppn_numeric ? c.ppn_numeric.toFixed(2) : "--") + ' <small style="font-size:0.5em;font-weight:400;">per night</small></div>' +
+            '<div class="per-night" style="font-size:1.15rem;font-weight:600;margin-top:0.25rem;">\u00a3' + (c.price_numeric ? c.price_numeric.toLocaleString() : "--") + ' total <small style="font-weight:400;">(' + (c.duration_nights || "?") + ' nights)</small></div>' +
+            '<div style="margin-top:0.5rem;">' + indicatorBadge(c.price_indicator) + '</div>' +
             '<p style="font-size:0.8rem;color:var(--text-light);margin-top:0.5rem;">' + (indicatorExplain[c.price_indicator] || "") + '</p>' +
             '</div>' +
             priceBar +
@@ -371,7 +372,7 @@
         var items = data[key] || [];
         var cardsHtml = '<div class="deals-grid">';
         items.forEach(function (d) {
-            cardsHtml += '<div class="deal-card">' +
+            cardsHtml += '<div class="deal-card" data-cruise-id="' + esc(d.cruise_id) + '" style="cursor:pointer;">' +
                 '<div class="deal-name">' + esc(d.cruise_name) + '</div>' +
                 '<div class="deal-meta">' + esc(d.ship || "") + ' &middot; ' + esc(d.cruise_line || "") + ' &middot; ' + (d.duration_nights || "") + 'n &middot; ' + esc(d.departure_date || "") + '</div>' +
                 '<div class="deal-price">\u00a3' + d.ppn_numeric.toFixed(2) + '<small>/night</small> ' + indicatorBadge(d.price_indicator) + '</div>' +
@@ -398,7 +399,7 @@
         var html = "";
         if (drops.length === 0) { html = '<p class="loading">No price drops detected in the latest scrape.</p>'; }
         drops.forEach(function (d) {
-            html += '<div class="drop-card">' +
+            html += '<div class="drop-card" data-cruise-id="' + esc(d.cruise_id) + '" style="cursor:pointer;">' +
                 '<div class="drop-info">' +
                 '<div class="drop-name">' + esc(d.cruise_name) + '</div>' +
                 '<div class="drop-meta">' + esc(d.ship || "") + ' &middot; ' + esc(d.cruise_line || "") + ' &middot; ' + (d.duration_nights || "") + 'n &middot; ' + esc(d.departure_date || "") + '</div>' +
@@ -581,8 +582,23 @@
         // Deal sub-tabs
         document.getElementById("tab-top-deals").addEventListener("click", function (e) {
             var btn = e.target.closest(".deal-sub-tab");
-            if (!btn || !reportCache.topDeals) return;
-            renderTopDeals(reportCache.topDeals, btn.getAttribute("data-deal-key"));
+            if (btn && reportCache.topDeals) {
+                renderTopDeals(reportCache.topDeals, btn.getAttribute("data-deal-key"));
+                return;
+            }
+            // Click on deal card -> open detail
+            var card = e.target.closest("[data-cruise-id]");
+            if (card && !e.target.closest("a")) {
+                showDetail(card.getAttribute("data-cruise-id"));
+            }
+        });
+
+        // Click on price drop card -> open detail
+        document.getElementById("tab-price-drops").addEventListener("click", function (e) {
+            var card = e.target.closest("[data-cruise-id]");
+            if (card && !e.target.closest("a")) {
+                showDetail(card.getAttribute("data-cruise-id"));
+            }
         });
     });
 
