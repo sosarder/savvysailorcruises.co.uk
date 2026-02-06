@@ -226,11 +226,11 @@ a:hover { text-decoration: underline; }
     margin-right: 0.5rem;
 }
 .detail-links a:hover { background: #e08f4e; text-decoration: none; }
-.price-bar-container { margin: 0.5rem 0; }
-.price-bar-track { background: #e9ecef; border-radius: 4px; height: 12px; position: relative; }
-.price-bar-fill { height: 100%; border-radius: 4px; background: var(--success); }
-.price-bar-marker { position: absolute; top: -3px; width: 3px; height: 18px; background: var(--danger); border-radius: 1px; }
-.price-bar-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-light); margin-top: 0.2rem; }
+.price-bar-container { margin: 1rem 0; padding: 1rem; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--border); }
+.price-bar-track { background: #e9ecef; border-radius: 6px; height: 24px; position: relative; overflow: visible; }
+.price-bar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 6px; }
+.price-bar-marker { position: absolute; top: -6px; width: 4px; height: 36px; border-radius: 2px; z-index: 2; }
+.price-bar-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-light); margin-top: 0.5rem; }
 
 /* --- Reports --- */
 .reports-section {
