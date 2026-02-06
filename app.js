@@ -248,15 +248,24 @@
 
         var priceBar = "";
         if (c.min_price_ever && c.max_price_ever && c.ppn_numeric) {
-            var range = c.max_price_ever - c.min_price_ever;
-            var pct = range > 0 ? ((c.ppn_numeric - c.min_price_ever) / range * 100) : 50;
-            pct = Math.max(0, Math.min(100, pct));
+            var scaleMax = c.max_price_ever * 1.25;
+            var currentPct = (c.ppn_numeric / scaleMax * 100).toFixed(1);
+            var minPct = (c.min_price_ever / scaleMax * 100).toFixed(1);
+            var maxPct = (c.max_price_ever / scaleMax * 100).toFixed(1);
+            var barColor = currentPct < 40 ? 'var(--success)' : currentPct < 65 ? 'var(--warning)' : 'var(--danger)';
             priceBar = '<div class="price-bar-container">' +
-                '<p style="font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;">Price position</p>' +
+                '<p style="font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;">Price per night vs history</p>' +
                 '<div class="price-bar-track">' +
-                '<div class="price-bar-fill" style="width:' + pct + '%;background:' + (pct < 30 ? 'var(--success)' : pct < 70 ? 'var(--warning)' : 'var(--danger)') + ';"></div>' +
+                '<div class="price-bar-fill" style="width:' + currentPct + '%;background:' + barColor + ';"></div>' +
+                '<div class="price-bar-marker" style="left:' + minPct + '%;background:var(--success);" title="Lowest ever: \u00a3' + c.min_price_ever.toFixed(0) + '/n"></div>' +
+                '<div class="price-bar-marker" style="left:' + maxPct + '%;background:var(--danger);" title="Highest ever: \u00a3' + c.max_price_ever.toFixed(0) + '/n"></div>' +
                 '</div>' +
-                '<div class="price-bar-labels"><span>\u00a3' + c.min_price_ever.toFixed(0) + '/n (min)</span><span>\u00a3' + c.max_price_ever.toFixed(0) + '/n (max)</span></div>' +
+                '<div class="price-bar-labels" style="position:relative;">' +
+                '<span>\u00a30</span>' +
+                '<span style="position:absolute;left:' + minPct + '%;transform:translateX(-50%);color:var(--success);font-weight:600;">\u00a3' + c.min_price_ever.toFixed(0) + '</span>' +
+                '<span style="position:absolute;left:' + maxPct + '%;transform:translateX(-50%);color:var(--danger);font-weight:600;">\u00a3' + c.max_price_ever.toFixed(0) + '</span>' +
+                '<span>\u00a3' + Math.round(scaleMax) + '</span>' +
+                '</div>' +
                 '</div>';
         }
 
@@ -413,103 +422,6 @@
         document.getElementById("tab-price-drops").innerHTML = html;
     }
 
-    function loadWhenToBook() {
-        if (reportCache.booking) { renderWhenToBook(reportCache.booking); return; }
-        var el = document.getElementById("tab-when-to-book");
-        el.innerHTML = '<p class="loading">Loading...</p>';
-        loadJSON("data/booking_window.json").then(function (data) {
-            reportCache.booking = data;
-            renderWhenToBook(data);
-        }).catch(function () { el.innerHTML = '<p class="loading">Failed to load.</p>'; });
-    }
-
-    function renderWhenToBook(data) {
-        var windows = data.windows || {};
-        var order = ["0-30", "31-60", "61-90", "91-180", "181-365", "366+"];
-        var maxPpn = 0;
-        order.forEach(function (k) { if (windows[k] && windows[k].avg_ppn > maxPpn) maxPpn = windows[k].avg_ppn; });
-
-        var html = '<h3 style="margin-bottom:1rem;">Average price per night by booking window</h3><div class="chart-container">';
-        order.forEach(function (k) {
-            var w = windows[k];
-            if (!w) return;
-            var pct = maxPpn > 0 ? (w.avg_ppn / maxPpn * 100) : 0;
-            var color = pct < 50 ? "var(--success)" : pct < 75 ? "var(--warning)" : "var(--danger)";
-            html += '<div class="bar-row">' +
-                '<span class="bar-label">' + esc(w.label) + '</span>' +
-                '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
-                '<span class="bar-value">\u00a3' + w.avg_ppn.toFixed(0) + '<span class="bar-sample">(n=' + w.sample_size.toLocaleString() + ')</span></span>' +
-                '</div>';
-        });
-        html += '</div>';
-        document.getElementById("tab-when-to-book").innerHTML = html;
-    }
-
-    function loadSeasonal() {
-        if (reportCache.seasonal) { renderSeasonal(reportCache.seasonal); return; }
-        var el = document.getElementById("tab-seasonal");
-        el.innerHTML = '<p class="loading">Loading...</p>';
-        loadJSON("data/seasonal_pricing.json").then(function (data) {
-            reportCache.seasonal = data;
-            renderSeasonal(data);
-        }).catch(function () { el.innerHTML = '<p class="loading">Failed to load.</p>'; });
-    }
-
-    function renderSeasonal(data) {
-        var months = data.months || {};
-        var order = ["January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"];
-        var maxPpn = 0;
-        order.forEach(function (m) { if (months[m] && months[m].avg_ppn > maxPpn) maxPpn = months[m].avg_ppn; });
-
-        var html = '<h3 style="margin-bottom:1rem;">Average price per night by departure month</h3><div class="chart-container">';
-        order.forEach(function (m) {
-            var d = months[m];
-            if (!d) return;
-            var pct = maxPpn > 0 ? (d.avg_ppn / maxPpn * 100) : 0;
-            var color = pct < 50 ? "var(--success)" : pct < 75 ? "var(--warning)" : "var(--danger)";
-            html += '<div class="bar-row">' +
-                '<span class="bar-label">' + m.slice(0, 3) + '</span>' +
-                '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
-                '<span class="bar-value">\u00a3' + d.avg_ppn.toFixed(0) + '<span class="bar-sample">(n=' + d.sample_size.toLocaleString() + ')</span></span>' +
-                '</div>';
-        });
-        html += '</div>';
-        document.getElementById("tab-seasonal").innerHTML = html;
-    }
-
-    function loadByCategory() {
-        if (reportCache.categories) { renderByCategory(reportCache.categories); return; }
-        var el = document.getElementById("tab-by-category");
-        el.innerHTML = '<p class="loading">Loading...</p>';
-        loadJSON("data/category_averages.json").then(function (data) {
-            reportCache.categories = data;
-            renderByCategory(data);
-        }).catch(function () { el.innerHTML = '<p class="loading">Failed to load.</p>'; });
-    }
-
-    function renderByCategory(data) {
-        var cats = data.categories || {};
-        var order = ["Budget", "Mid range", "Premium", "Luxury", "Ultra luxury"];
-        var maxPpn = 0;
-        order.forEach(function (k) { if (cats[k] && cats[k].avg_ppn > maxPpn) maxPpn = cats[k].avg_ppn; });
-
-        var html = '<h3 style="margin-bottom:1rem;">Average price per night by cruise line category</h3><div class="chart-container">';
-        order.forEach(function (k) {
-            var d = cats[k];
-            if (!d) return;
-            var pct = maxPpn > 0 ? (d.avg_ppn / maxPpn * 100) : 0;
-            var colors = { Budget: "var(--success)", "Mid range": "#4ecdc4", Premium: "var(--warning)", Luxury: "var(--accent)", "Ultra luxury": "var(--danger)" };
-            html += '<div class="bar-row">' +
-                '<span class="bar-label">' + esc(k) + '</span>' +
-                '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + (colors[k] || "var(--primary)") + ';"></div></div>' +
-                '<span class="bar-value">\u00a3' + d.avg_ppn.toFixed(0) + '<span class="bar-sample">(n=' + d.sample_size.toLocaleString() + ')</span></span>' +
-                '</div>';
-        });
-        html += '</div>';
-        document.getElementById("tab-by-category").innerHTML = html;
-    }
-
     // --- Event Listeners ---
     document.addEventListener("DOMContentLoaded", function () {
         init();
@@ -574,9 +486,6 @@
 
             // Lazy load
             if (tabId === "price-drops") loadPriceDrops();
-            else if (tabId === "when-to-book") loadWhenToBook();
-            else if (tabId === "seasonal") loadSeasonal();
-            else if (tabId === "by-category") loadByCategory();
         });
 
         // Deal sub-tabs
