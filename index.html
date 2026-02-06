@@ -3,51 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Savvy Sailor Cruises - Coming Soon</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-        }
-        .container { max-width: 600px; }
-        .logo { font-size: 4rem; margin-bottom: 1rem; }
-        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .tagline { font-size: 1.25rem; opacity: 0.9; margin-bottom: 2rem; }
-        .coming-soon {
-            background: rgba(255,255,255,0.1);
-            padding: 1.5rem 2rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-        .coming-soon h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .coming-soon p { opacity: 0.8; }
-        .social a {
-            color: #f4a261;
-            text-decoration: none;
-        }
-        .social a:hover { text-decoration: underline; }
-    </style>
+    <title>Savvy Sailor Cruises - Find the Best Cruise Deals</title>
+    <meta name="description" content="Track cruise prices and find the best deals. We monitor thousands of cruises so you don't have to.">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- Header -->
+<header class="site-header">
     <div class="container">
-        <div class="logo">⛵</div>
-        <h1>Savvy Sailor Cruises</h1>
-        <p class="tagline">Find the best cruise deals - we track prices so you don't have to</p>
-        <div class="coming-soon">
-            <h2>Coming Soon</h2>
-            <p>We're building something brilliant. Check back shortly.</p>
+        <div class="header-content">
+            <div class="logo-area">
+                <span class="logo">⛵</span>
+                <div>
+                    <h1>Savvy Sailor Cruises</h1>
+                    <p class="tagline">Find the best cruise deals &mdash; we track prices so you don&rsquo;t have to</p>
+                </div>
+            </div>
         </div>
-        <p class="social">
-            Follow us on <a href="https://www.facebook.com/profile.php?id=61586518061197" target="_blank">Facebook</a> for updates
+    </div>
+</header>
+
+<!-- Stats Bar -->
+<section class="stats-bar">
+    <div class="container stats-grid">
+        <div class="stat">
+            <span class="stat-value" id="stat-total">--</span>
+            <span class="stat-label">Cruises tracked</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-cheapest">--</span>
+            <span class="stat-label">Cheapest &pound;/night</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-drops">--</span>
+            <span class="stat-label">Price drops today</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-updated">--</span>
+            <span class="stat-label">Last updated</span>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<main class="container main-content">
+
+    <!-- Filters -->
+    <section class="filters-section">
+        <div class="filters-header">
+            <h2>Search Cruises</h2>
+            <button id="btn-clear-filters" class="btn btn-small">Clear filters</button>
+        </div>
+        <div class="filters-grid">
+            <div class="filter-group filter-wide">
+                <label for="filter-search">Search</label>
+                <input type="text" id="filter-search" placeholder="Cruise name, ship, destination...">
+            </div>
+            <div class="filter-group">
+                <label for="filter-cruise-line">Cruise line</label>
+                <select id="filter-cruise-line"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-category">Category</label>
+                <select id="filter-category"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-type">Type</label>
+                <select id="filter-type"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-route-type">Route</label>
+                <select id="filter-route-type">
+                    <option value="">All</option>
+                    <option value="circular">Circular</option>
+                    <option value="one-way">One-way</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-departure-port">Departure port</label>
+                <select id="filter-departure-port"><option value="">All</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-region">Region</label>
+                <select id="filter-region"><option value="">All</option></select>
+            </div>
+            <div class="filter-group filter-range">
+                <label>Nights</label>
+                <div class="range-inputs">
+                    <input type="number" id="filter-min-nights" placeholder="Min" min="1">
+                    <span>&ndash;</span>
+                    <input type="number" id="filter-max-nights" placeholder="Max" min="1">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="filter-max-ppn">Max &pound;/night</label>
+                <input type="number" id="filter-max-ppn" placeholder="e.g. 100" min="0" step="5">
+            </div>
+            <div class="filter-group">
+                <label for="filter-indicator">Price indicator</label>
+                <select id="filter-indicator">
+                    <option value="">All</option>
+                    <option value="lowest">&#9660; Lowest</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="high">&#9650; High</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results -->
+    <section class="results-section">
+        <div class="results-header">
+            <h2>Results <span id="results-count"></span></h2>
+        </div>
+        <div class="table-wrapper">
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th data-sort="cruise_name">Cruise <span class="sort-arrow"></span></th>
+                        <th data-sort="cruise_line">Cruise Line <span class="sort-arrow"></span></th>
+                        <th data-sort="ship">Ship <span class="sort-arrow"></span></th>
+                        <th data-sort="departure_date">Departure <span class="sort-arrow"></span></th>
+                        <th data-sort="duration_nights" class="num">Nights <span class="sort-arrow"></span></th>
+                        <th data-sort="ppn_numeric" class="num">&#163;/Night <span class="sort-arrow"></span></th>
+                        <th data-sort="price_numeric" class="num">Price <span class="sort-arrow"></span></th>
+                        <th data-sort="price_indicator">Rating <span class="sort-arrow"></span></th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+    </section>
+
+    <!-- Detail Panel -->
+    <section class="detail-panel" id="detail-panel" style="display:none;">
+        <button class="detail-close" id="detail-close">&times;</button>
+        <div id="detail-content"></div>
+    </section>
+
+    <!-- Reports Section -->
+    <section class="reports-section">
+        <h2>Reports &amp; Insights</h2>
+        <div class="report-tabs">
+            <button class="tab active" data-tab="top-deals">Top Deals</button>
+            <button class="tab" data-tab="price-drops">Price Drops</button>
+            <button class="tab" data-tab="when-to-book">When to Book</button>
+            <button class="tab" data-tab="seasonal">Seasonal Prices</button>
+            <button class="tab" data-tab="by-category">By Category</button>
+        </div>
+        <div class="report-content" id="report-content">
+            <div class="report-tab-content active" id="tab-top-deals"></div>
+            <div class="report-tab-content" id="tab-price-drops"></div>
+            <div class="report-tab-content" id="tab-when-to-book"></div>
+            <div class="report-tab-content" id="tab-seasonal"></div>
+            <div class="report-tab-content" id="tab-by-category"></div>
+        </div>
+    </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="site-footer">
+    <div class="container">
+        <p>Data sourced from <a href="https://www.comparethatcruise.com" target="_blank" rel="noopener">Compare That Cruise</a>. Prices are per person based on the cheapest cabin.</p>
+        <p>
+            Follow us on <a href="https://www.facebook.com/profile.php?id=61586518061197" target="_blank" rel="noopener">Facebook</a>
+            &middot; <a href="privacy.html">Privacy Policy</a>
         </p>
     </div>
+</footer>
+
+<script src="app.js"></script>
 </body>
 </html>
