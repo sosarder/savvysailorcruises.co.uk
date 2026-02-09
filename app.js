@@ -54,19 +54,56 @@
 
     // --- Populate filter dropdowns ---
     function populateFilters() {
-        var cruiseLines = {}, categories = {}, types = {}, ports = {}, regions = {};
+        var cruiseLines = {}, categories = {}, types = {}, ports = {}, regions = {}, depMonths = {};
         listings.forEach(function (c) {
             if (c.cruise_line) cruiseLines[c.cruise_line] = 1;
             if (c.cruise_line_category) categories[c.cruise_line_category] = 1;
             if (c.cruise_type) types[c.cruise_type] = 1;
             if (c.start_port) ports[c.start_port] = 1;
             if (c.region) regions[c.region] = 1;
+            if (c.departure_date) {
+                var ym = parseDepartureMonth(c.departure_date);
+                if (ym) depMonths[ym] = 1;
+            }
         });
         fillSelect("filter-cruise-line", Object.keys(cruiseLines).sort());
         fillSelect("filter-category", Object.keys(categories).sort());
         fillSelect("filter-type", Object.keys(types).sort());
         fillSelect("filter-departure-port", Object.keys(ports).sort());
         fillSelect("filter-region", Object.keys(regions).sort());
+        fillSelectWithLabels("filter-departure-month", Object.keys(depMonths).sort(), formatMonthLabel);
+    }
+
+    function parseDepartureMonth(dateStr) {
+        if (!dateStr) return null;
+        var months = { January: "01", February: "02", March: "03", April: "04", May: "05", June: "06",
+            July: "07", August: "08", September: "09", October: "10", November: "11", December: "12" };
+        var parts = dateStr.split(" ");
+        if (parts.length === 3 && months[parts[1]]) {
+            return parts[2] + "-" + months[parts[1]];
+        }
+        return null;
+    }
+
+    function formatMonthLabel(ym) {
+        var monthNames = { "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr", "05": "May", "06": "Jun",
+            "07": "Jul", "08": "Aug", "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec" };
+        var parts = ym.split("-");
+        if (parts.length === 2) return monthNames[parts[1]] + " " + parts[0];
+        return ym;
+    }
+
+    function fillSelectWithLabels(id, items, labelFn) {
+        var sel = document.getElementById(id);
+        var current = sel.value;
+        while (sel.options.length > 1) sel.remove(1);
+        items.forEach(function (item) {
+            var opt = document.createElement("option");
+            opt.value = item;
+            opt.textContent = labelFn ? labelFn(item) : item;
+            sel.appendChild(opt);
+        });
+        sel.value = current;
     }
 
     function fillSelect(id, items) {
@@ -92,6 +129,7 @@
             routeType: document.getElementById("filter-route-type").value,
             departurePort: document.getElementById("filter-departure-port").value,
             region: document.getElementById("filter-region").value,
+            departureMonth: document.getElementById("filter-departure-month").value,
             minNights: parseInt(document.getElementById("filter-min-nights").value) || 0,
             maxNights: parseInt(document.getElementById("filter-max-nights").value) || 0,
             maxPpn: parseFloat(document.getElementById("filter-max-ppn").value) || 0,
@@ -114,6 +152,7 @@
             if (f.routeType === "one-way" && c.circular) return false;
             if (f.departurePort && c.start_port !== f.departurePort) return false;
             if (f.region && c.region !== f.region) return false;
+            if (f.departureMonth && parseDepartureMonth(c.departure_date) !== f.departureMonth) return false;
             if (f.minNights && c.duration_nights < f.minNights) return false;
             if (f.maxNights && c.duration_nights > f.maxNights) return false;
             if (f.maxPpn && c.ppn_numeric && c.ppn_numeric > f.maxPpn) return false;
@@ -331,6 +370,7 @@
         if (f.routeType) params.set("route", f.routeType);
         if (f.departurePort) params.set("port", f.departurePort);
         if (f.region) params.set("region", f.region);
+        if (f.departureMonth) params.set("depmonth", f.departureMonth);
         if (f.minNights) params.set("minn", f.minNights);
         if (f.maxNights) params.set("maxn", f.maxNights);
         if (f.maxPpn) params.set("maxppn", f.maxPpn);
@@ -348,6 +388,7 @@
         if (params.get("route")) document.getElementById("filter-route-type").value = params.get("route");
         if (params.get("port")) document.getElementById("filter-departure-port").value = params.get("port");
         if (params.get("region")) document.getElementById("filter-region").value = params.get("region");
+        if (params.get("depmonth")) document.getElementById("filter-departure-month").value = params.get("depmonth");
         if (params.get("minn")) document.getElementById("filter-min-nights").value = params.get("minn");
         if (params.get("maxn")) document.getElementById("filter-max-nights").value = params.get("maxn");
         if (params.get("maxppn")) document.getElementById("filter-max-ppn").value = params.get("maxppn");
@@ -428,7 +469,7 @@
 
         // Filter inputs
         var filterIds = ["filter-search", "filter-cruise-line", "filter-category", "filter-type",
-            "filter-route-type", "filter-departure-port", "filter-region",
+            "filter-route-type", "filter-departure-port", "filter-region", "filter-departure-month",
             "filter-min-nights", "filter-max-nights", "filter-max-ppn", "filter-indicator"];
         filterIds.forEach(function (id) {
             var el = document.getElementById(id);
